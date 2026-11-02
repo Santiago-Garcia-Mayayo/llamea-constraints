@@ -40,7 +40,8 @@ def fitness_sequence(run_dir: str) -> list[float]:
     logs = sorted(glob.glob(os.path.join(run_dir, "*", "log.jsonl")))
     if logs:
         seq = []
-        for line in open(logs[0]):
+        # the most recent log: an interrupted earlier attempt can leave a shorter one
+        for line in open(logs[-1]):
             try:
                 seq.append(_fit(json.loads(line).get("fitness")))
             except json.JSONDecodeError:

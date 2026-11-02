@@ -102,7 +102,8 @@ def candidates(runs="results/llamea", arms=ARMS):
                 best = None
                 if os.path.exists(os.path.join(rd, "best.json")):
                     best = json.load(open(os.path.join(rd, "best.json"))).get("code")
-                for k, line in enumerate(open(logs[0])):
+                # the most recent log: an interrupted earlier attempt can leave a shorter one
+                for k, line in enumerate(open(logs[-1])):
                     try:
                         c = json.loads(line)
                     except json.JSONDecodeError:
