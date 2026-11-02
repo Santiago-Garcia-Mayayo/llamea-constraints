@@ -51,6 +51,40 @@ def test_cmaes_runs_to_budget_and_is_feasible(cls, arm):
     assert r.found_feasible and r.best_f < 1.5
 
 
+def test_epsilon_comparison_relaxes_then_equals_deb():
+    from baselines.common import EpsilonComparison
+    F = [5.0, 1.0, 3.0, 0.5, 2.0]
+    G = [[0, 0], [0.2, 0], [0, 0], [3.0, 1.0], [0.05, 0]]
+    c = EpsilonComparison()
+    K = c.evaluate(_fake_free(F, G), None)
+    assert c.eps0 == 0.0          # theta-th best (index 1 of 5) violation is 0
+    c.eps0, c.eps = 0.1, 0.1     # with eps = 0.1, the point violating by 0.05 counts as feasible
+    K = c.rekey(K, 0.0)
+    assert order(K).tolist() == [4, 2, 0, 1, 3]
+    K = c.rekey(K, 1.0)           # after Tc: eps = 0, exactly Deb's order
+    deb = order(DebComparison().evaluate(_fake_free(F, G), None)).tolist()
+    assert c.eps == 0.0 and order(K).tolist() == deb
+
+
+@pytest.mark.parametrize("name", ["LSHADEEps", "LSHADEEpsLong"])
+def test_lshade_eps_solves_toy(name):
+    import baselines.lshade as L
+    r, _ = run_one(getattr(L, name), ToyProblem(), "free", 0, 3000, 60)
+    assert r.status == "budget_exhausted" and r.n_evals == 3000
+    assert r.found_feasible and r.best_f - 1.0 < 1e-3
+
+
+def test_long_epsilon_schedule():
+    from baselines.common import EpsilonComparisonLong
+    c = EpsilonComparisonLong()
+    K = c.evaluate(_fake_free([1.0, 2.0, 3.0, 4.0], [[0.0], [2.0], [4.0], [6.0]]), None)
+    assert c.eps0 == 4.0 and c.eps == 4.0                 # median of the positive violations
+    c.rekey(K, 0.3)
+    assert abs(c.eps - 4.0 * 0.5 ** 3) < 1e-12
+    c.rekey(K, 0.6)
+    assert c.eps == 0.0
+
+
 def test_colshade_solves_toy_and_uses_the_whole_budget():
     from baselines.colshade import COLSHADE
     r, _ = run_one(COLSHADE, ToyProblem(), "free", 0, 3000, 60)

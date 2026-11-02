@@ -14,4 +14,6 @@ BASELINES = {
     "cmaes_penalty":  ("baselines.cmaes:CMAESPenalty", "penalty"),
     "cmaes_deb":      ("baselines.cmaes:CMAESDeb", "free"),
     "colshade":       ("baselines.colshade:COLSHADE", "free"),   # CEC 2020 runner-up (Deb + Levy)
+    "lshade_eps":     ("baselines.lshade:LSHADEEps", "free"),    # same L-SHADE, epsilon (eps-DEag schedule)
+    "lshade_eps_long": ("baselines.lshade:LSHADEEpsLong", "free"),  # epsilon, relaxed and longer (LLaMEA-like)
 }

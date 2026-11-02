@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from .common import DebComparison, PenaltyComparison, improvement, leq, lt, order
+from .common import DebComparison, EpsilonComparison, EpsilonComparisonLong, PenaltyComparison, improvement, leq, lt, order
 
 
 class _LSHADE:
@@ -41,6 +41,8 @@ class _LSHADE:
         k_mem = 0
         archive = np.empty((0, d))
         while True:
+            if hasattr(cmp, "rekey"):                   # epsilon level changes with the budget used
+                K = cmp.rekey(K, nfe / self.budget)
             idx = order(K)
             p_num = max(2, int(round(self.P_BEST * NP)))
             r = rng.integers(self.H, size=NP)
@@ -100,3 +102,13 @@ class LSHADEPenalty(_LSHADE):
 
 class LSHADEDeb(_LSHADE):
     comparison = DebComparison
+
+
+class LSHADEEps(_LSHADE):
+    """Same L-SHADE, epsilon-constrained comparison instead of Deb's rules (the only difference)."""
+    comparison = EpsilonComparison
+
+
+class LSHADEEpsLong(_LSHADE):
+    """Same L-SHADE, relaxed and longer epsilon schedule (eps reaches 0 at 60% of the budget)."""
+    comparison = EpsilonComparisonLong

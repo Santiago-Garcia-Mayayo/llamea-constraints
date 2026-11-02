@@ -32,10 +32,13 @@ BASE = {"colshade": ("COLSHADE (CEC 2020)", "#0b0b0b", (0, (6, 2, 1.5, 2, 1.5, 2
         "lshade_penalty": ("L-SHADE + penalty", "#9a9893", (0, (1.5, 2.5))),
         "cmaes_deb": ("CMA-ES + Deb", "#52514e", (0, (8, 2, 1.5, 2))),
         "cmaes_penalty": ("CMA-ES + penalty", "#9a9893", (0, (3, 1.5))),
-        "random_search": ("random search", "#bdbbb5", "solid")}
-DEFAULT_CURVES = ("colshade", "lshade_deb", "lshade_penalty")
+        "random_search": ("random search", "#bdbbb5", "solid"),
+        "lshade_eps": ("L-SHADE + ε (εDEag)", "#7a7975", (0, (2, 1))),
+        "lshade_eps_long": ("L-SHADE + ε (long)", "#2b2b29", (0, (1, 1)))}
+DEFAULT_CURVES = ("colshade", "lshade_deb", "lshade_penalty", "lshade_eps_long")
 SHORT = {"colshade": "COLSHADE", "lshade_deb": "L-SHADE Deb", "lshade_penalty": "L-SHADE pen.", "cmaes_deb": "CMA-ES Deb",
-         "cmaes_penalty": "CMA-ES pen.", "random_search": "random"}
+         "cmaes_penalty": "CMA-ES pen.", "random_search": "random",
+         "lshade_eps": "L-SHADE ε", "lshade_eps_long": "L-SHADE ε-long"}
 
 
 def dense(curve, budget, grid):
