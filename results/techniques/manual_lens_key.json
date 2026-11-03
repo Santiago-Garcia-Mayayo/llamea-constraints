@@ -1,0 +1,260 @@
+{
+ "L01": {
+  "primary": "feasibility_rules",
+  "techniques": [
+   "penalty_adaptive",
+   "constraint_surrogate",
+   "per_constraint_guidance",
+   "feasibility_rules",
+   "repair",
+   "feasible_archive"
+  ],
+  "arm": "informed_v2",
+  "problem": "lens/realistic_draft",
+  "tag": "haiku5-r3"
+ },
+ "L02": {
+  "primary": "epsilon_constrained",
+  "techniques": [
+   "epsilon_constrained",
+   "feasibility_rules",
+   "repair",
+   "feasible_archive",
+   "per_constraint_guidance"
+  ],
+  "arm": "free",
+  "problem": "lens/realistic_draft",
+  "tag": "haiku5-r2"
+ },
+ "L03": {
+  "primary": "feasibility_rules",
+  "techniques": [
+   "feasibility_rules",
+   "feasible_archive",
+   "per_constraint_guidance",
+   "repair",
+   "boundary_search"
+  ],
+  "arm": "free",
+  "problem": "lens/realistic_draft",
+  "tag": "haiku5-r5"
+ },
+ "L04": {
+  "primary": "penalty_adaptive",
+  "techniques": [
+   "penalty_adaptive",
+   "feasibility_rules",
+   "repair",
+   "feasible_archive",
+   "per_constraint_guidance"
+  ],
+  "arm": "informed_v2",
+  "problem": "lens/realistic_draft",
+  "tag": "haiku5-r5"
+ },
+ "L05": {
+  "primary": "epsilon_constrained",
+  "techniques": [
+   "epsilon_constrained",
+   "feasibility_rules",
+   "feasible_archive",
+   "repair",
+   "boundary_search",
+   "per_constraint_guidance"
+  ],
+  "arm": "free",
+  "problem": "lens/realistic_draft",
+  "tag": "haiku5-r3"
+ },
+ "L06": {
+  "primary": "epsilon_constrained",
+  "techniques": [
+   "epsilon_constrained",
+   "feasible_archive",
+   "repair",
+   "per_constraint_guidance"
+  ],
+  "arm": "free",
+  "problem": "lens/original",
+  "tag": "haiku5"
+ },
+ "L07": {
+  "primary": "epsilon_constrained",
+  "techniques": [
+   "epsilon_constrained",
+   "feasibility_rules",
+   "feasible_archive",
+   "boundary_search",
+   "per_constraint_guidance"
+  ],
+  "arm": "free",
+  "problem": "lens/original",
+  "tag": "haiku5-r5"
+ },
+ "L08": {
+  "primary": "feasibility_rules",
+  "techniques": [
+   "feasibility_rules",
+   "repair",
+   "feasible_archive",
+   "per_constraint_guidance"
+  ],
+  "arm": "free",
+  "problem": "lens/realistic_draft",
+  "tag": "haiku5"
+ },
+ "L09": {
+  "primary": "feasibility_rules",
+  "techniques": [
+   "feasibility_rules",
+   "per_constraint_guidance",
+   "constraint_surrogate",
+   "repair",
+   "feasible_archive",
+   "penalty_adaptive"
+  ],
+  "arm": "informed_v2",
+  "problem": "lens/realistic_draft",
+  "tag": "haiku5-r4"
+ },
+ "L10": {
+  "primary": "penalty_adaptive",
+  "techniques": [
+   "penalty_adaptive",
+   "feasibility_rules",
+   "repair",
+   "feasible_archive",
+   "per_constraint_guidance"
+  ],
+  "arm": "informed_v2",
+  "problem": "lens/original",
+  "tag": "haiku5-r2"
+ },
+ "L11": {
+  "primary": "feasibility_rules",
+  "techniques": [
+   "feasibility_rules",
+   "penalty_adaptive",
+   "per_constraint_guidance",
+   "repair",
+   "boundary_search",
+   "feasible_archive"
+  ],
+  "arm": "informed_v2",
+  "problem": "lens/original",
+  "tag": "haiku5-r3"
+ },
+ "L12": {
+  "primary": "feasibility_rules",
+  "techniques": [
+   "feasibility_rules",
+   "feasible_archive",
+   "repair",
+   "boundary_search"
+  ],
+  "arm": "free",
+  "problem": "lens/realistic_draft",
+  "tag": "haiku5-r4"
+ },
+ "L13": {
+  "primary": "epsilon_constrained",
+  "techniques": [
+   "epsilon_constrained",
+   "feasible_archive",
+   "repair",
+   "per_constraint_guidance",
+   "feasibility_rules"
+  ],
+  "arm": "informed_v2",
+  "problem": "lens/original",
+  "tag": "haiku5-r4"
+ },
+ "L14": {
+  "primary": "epsilon_constrained",
+  "techniques": [
+   "epsilon_constrained",
+   "feasibility_rules",
+   "feasible_archive",
+   "repair",
+   "per_constraint_guidance"
+  ],
+  "arm": "free",
+  "problem": "lens/original",
+  "tag": "haiku5-r4"
+ },
+ "L15": {
+  "primary": "feasibility_rules",
+  "techniques": [
+   "feasibility_rules",
+   "per_constraint_guidance",
+   "constraint_surrogate",
+   "repair",
+   "feasible_archive"
+  ],
+  "arm": "informed_v2",
+  "problem": "lens/realistic_draft",
+  "tag": "haiku5-r2"
+ },
+ "L16": {
+  "primary": "penalty_adaptive",
+  "techniques": [
+   "penalty_adaptive",
+   "feasible_archive",
+   "per_constraint_guidance",
+   "feasibility_rules",
+   "repair"
+  ],
+  "arm": "informed_v2",
+  "problem": "lens/realistic_draft",
+  "tag": "haiku5"
+ },
+ "L17": {
+  "primary": "feasibility_rules",
+  "techniques": [
+   "feasibility_rules",
+   "feasible_archive",
+   "per_constraint_guidance"
+  ],
+  "arm": "free",
+  "problem": "lens/original",
+  "tag": "haiku5-r3"
+ },
+ "L18": {
+  "primary": "feasibility_rules",
+  "techniques": [
+   "feasibility_rules",
+   "per_constraint_guidance",
+   "boundary_search",
+   "repair"
+  ],
+  "arm": "informed_v2",
+  "problem": "lens/original",
+  "tag": "haiku5"
+ },
+ "L19": {
+  "primary": "feasibility_rules",
+  "techniques": [
+   "penalty_adaptive",
+   "feasibility_rules",
+   "feasible_archive",
+   "repair",
+   "per_constraint_guidance",
+   "constraint_surrogate"
+  ],
+  "arm": "informed_v2",
+  "problem": "lens/original",
+  "tag": "haiku5-r5"
+ },
+ "L20": {
+  "primary": "epsilon_constrained",
+  "techniques": [
+   "epsilon_constrained",
+   "feasibility_rules",
+   "feasible_archive",
+   "per_constraint_guidance"
+  ],
+  "arm": "free",
+  "problem": "lens/original",
+  "tag": "haiku5-r2"
+ }
+}
