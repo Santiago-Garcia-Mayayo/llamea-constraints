@@ -116,22 +116,30 @@ def make_llamea(arm: str, llm, problem_id, budget: int = config.LLAMEA_BUDGET,
                 n_parents: int = config.LLAMEA_N_PARENTS, n_offspring: int = config.LLAMEA_N_OFFSPRING,
                 elitism: bool = config.LLAMEA_ELITISM, experiment_name: str = "",
                 max_workers: int | None = None, n_workers_per_candidate: int | None = None,
-                log_dir: str | None = None, seeds=config.TRAIN_SEEDS, **kwargs):
+                log_dir: str | None = None, seeds=config.TRAIN_SEEDS, llm_timeout: int = 0, **kwargs):
     """LLaMEA instance with the arm's prompts for one problem. Fitness is maximised.
 
     Parallelism: LLaMEA evaluates up to `max_workers` candidates at once (default: all
     offspring of a generation) and each candidate runs its seeds in parallel, so one run uses
-    about n_offspring x len(seeds) processes."""
+    about n_offspring x len(seeds) processes.
+
+    LLaMEA waits for each parallel job (LLM query + evaluation) at most eval_timeout + 15 s, and
+    eval_timeout is only used for that wait (evaluations have their own limits in the runner).
+    llm_timeout adds seconds for the LLM itself: 0 for API models, which answer in seconds;
+    more for slow local models whose requests also queue on one server."""
     from llamea import LLaMEA
     # informed arm = free prompt + behaviour statistics in the feedback + LLaMEA-SAGE guidance
     # over code-structure and behaviour features (see sage_features).
     # informed_v2 = free prompt + diagnoses and parent comparison in the feedback; no SAGE.
     kwargs.setdefault("feature_guided_mutation", arm == "informed")
+    # mutation prompt: LLaMEA's default unless LLAMEA_MUTATION names one of prompts.MUTATIONS
+    if os.environ.get("LLAMEA_MUTATION"):
+        kwargs.setdefault("operators", [prompts.MUTATIONS[os.environ["LLAMEA_MUTATION"]]])
     evaluator = make_evaluator(arm, problem_id, seeds, n_workers=n_workers_per_candidate, log_dir=log_dir)
     return LLaMEA(evaluator, llm=llm,
                   n_parents=n_parents, n_offspring=n_offspring, elitism=elitism,
                   role_prompt=prompts.ROLE, task_prompt=prompts.task_prompt(arm),
                   example_prompt=prompts.example_prompt(arm),
                   experiment_name=experiment_name or f"{arm}-{problem_id.replace('/', '_')}",
-                  budget=budget, eval_timeout=candidate_timeout(problem_id, seeds),
+                  budget=budget, eval_timeout=candidate_timeout(problem_id, seeds) + int(llm_timeout),
                   max_workers=max_workers or n_offspring, minimization=False, **kwargs)

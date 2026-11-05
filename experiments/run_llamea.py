@@ -3,6 +3,8 @@
     python -m experiments.run_llamea --problems cec/RC15 --arms free            # one run
     python -m experiments.run_llamea --parallel 4                                # all 30 runs
     python -m experiments.run_llamea --model claude-haiku-5-5 --budget 10 --problems cec/RC15 --arms free --tag pilot
+    python -m experiments.run_llamea --provider ollama --model qwen2.5-coder:32b --ollama-host http://localhost:11434 \
+        --budget 10 --problems cec/RC15 --arms free --tag pilot-ollama
 
 Every run lives in <out>/<tag>/<arm>/<problem>/ :
     best.json        best algorithm (code, name, training fitness) -- written at the end
@@ -10,7 +12,8 @@ Every run lives in <out>/<tag>/<arm>/<problem>/ :
     LLaMEA-*/        LLaMEA's own log (conversation, population per generation)
     run.log          stdout/stderr of the run
 Runs that already have best.json are skipped (resumable). Each run is its own subprocess.
-Needs ANTHROPIC_API_KEY in the environment.
+Needs ANTHROPIC_API_KEY in the environment (provider anthropic), or a reachable Ollama server
+(provider ollama; see harness/llms.py).
 """
 from __future__ import annotations
 
@@ -24,6 +27,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from harness import config
 from harness.core import ARMS
+from harness.llms import PROVIDERS
 
 
 def run_dir(out, tag, arm, pid):
@@ -31,22 +35,20 @@ def run_dir(out, tag, arm, pid):
 
 
 def single(pid, arm, out, tag, model, budget, n_parents, n_offspring, elitism, temperature,
-           max_workers=None):
+           max_workers=None, provider="anthropic", ollama_host=None, num_ctx=32768, llm_timeout=0):
     """Run one LLaMEA in this process (called in a subprocess by `main`)."""
-    import anthropic
-    from llamea.llm import Anthropic_LLM
+    from harness.llms import make_llm
     from harness.llamea_adapter import make_llamea
     d = os.path.abspath(run_dir(out, tag, arm, pid))
     os.makedirs(d, exist_ok=True)
     os.chdir(d)                                   # LLaMEA writes its log to the working directory
-    llm = Anthropic_LLM(api_key=os.environ["ANTHROPIC_API_KEY"], model=model,
-                        temperature=anthropic.NOT_GIVEN if temperature is None else temperature)
+    llm = make_llm(provider, model, temperature=temperature, ollama_host=ollama_host, num_ctx=num_ctx)
     es = make_llamea(arm, llm, pid, budget=budget, n_parents=n_parents, n_offspring=n_offspring,
                      elitism=elitism, experiment_name=f"{arm}-{pid.replace('/', '_')}",
-                     log_dir=os.path.join(d, "candidates"), max_workers=max_workers)
+                     log_dir=os.path.join(d, "candidates"), max_workers=max_workers, llm_timeout=llm_timeout)
     t0 = time.time()
     best = es.run()
-    rec = {"problem": pid, "arm": arm, "model": model, "budget": budget, "n_parents": n_parents,
+    rec = {"problem": pid, "arm": arm, "provider": provider, "model": model, "llm_timeout": llm_timeout, "budget": budget, "n_parents": n_parents,
            "n_offspring": n_offspring, "elitism": elitism, "temperature": temperature,
            "name": best.name, "fitness": best.fitness, "code": best.code, "description": best.description,
                       "wall_time_s": time.time() - t0}
@@ -59,7 +61,12 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--problems", nargs="*", default=list(config.PROBLEMS))
     ap.add_argument("--arms", nargs="*", default=list(ARMS), choices=ARMS)
+    ap.add_argument("--provider", default="anthropic", choices=PROVIDERS)
     ap.add_argument("--model", default=config.LLM_MODEL)
+    ap.add_argument("--ollama-host", default=None, help="Ollama server (default: OLLAMA_HOST or localhost:11434)")
+    ap.add_argument("--num-ctx", type=int, default=32768, help="Ollama context window (tokens)")
+    ap.add_argument("--llm-timeout", type=int, default=None,
+                    help="extra seconds LLaMEA waits for each LLM answer (default 0 for anthropic, 1800 for ollama)")
     ap.add_argument("--temperature", type=float, default=config.LLM_TEMPERATURE)
     ap.add_argument("--budget", type=int, default=config.LLAMEA_BUDGET, help="candidates per run")
     ap.add_argument("--n-parents", type=int, default=config.LLAMEA_N_PARENTS)
@@ -71,11 +78,14 @@ def main():
                     help="LLaMEA runs at the same time; each uses ~n_offspring x 3 processes")
     ap.add_argument("--single", action="store_true", help=argparse.SUPPRESS)
     a = ap.parse_args()
-    if not os.environ.get("ANTHROPIC_API_KEY"):
+    if a.llm_timeout is None:
+        a.llm_timeout = 1800 if a.provider == "ollama" else 0
+    if a.provider == "anthropic" and not os.environ.get("ANTHROPIC_API_KEY"):
         ap.error("ANTHROPIC_API_KEY is not set")
     if a.single:
         single(a.problems[0], a.arms[0], a.out, a.tag, a.model, a.budget, a.n_parents, a.n_offspring,
-               not a.no_elitism, a.temperature)
+               not a.no_elitism, a.temperature, provider=a.provider, ollama_host=a.ollama_host,
+               num_ctx=a.num_ctx, llm_timeout=a.llm_timeout)
         return
     todo = [(pid, arm) for pid in a.problems for arm in a.arms
             if not os.path.exists(os.path.join(run_dir(a.out, a.tag, arm, pid), "best.json"))]
@@ -87,7 +97,10 @@ def main():
         os.makedirs(d, exist_ok=True)
         cmd = [sys.executable, "-m", "experiments.run_llamea", "--single", "--problems", pid, "--arms", arm,
                "--model", a.model, "--budget", str(a.budget), "--n-parents", str(a.n_parents),
-               "--n-offspring", str(a.n_offspring), "--out", os.path.abspath(a.out), "--tag", a.tag]
+               "--n-offspring", str(a.n_offspring), "--out", os.path.abspath(a.out), "--tag", a.tag,
+               "--provider", a.provider, "--num-ctx", str(a.num_ctx), "--llm-timeout", str(a.llm_timeout)]
+        if a.ollama_host:
+            cmd += ["--ollama-host", a.ollama_host]
         if a.temperature is not None:
             cmd += ["--temperature", str(a.temperature)]
         if a.no_elitism:

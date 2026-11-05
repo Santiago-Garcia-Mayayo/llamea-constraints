@@ -107,3 +107,10 @@ def task_prompt(arm: str) -> str:
 
 def example_prompt(arm: str) -> str:
     return _EXAMPLE[arm]
+
+
+MUTATIONS = {
+    "refine": "Refine the strategy of the selected solution to improve it.", 
+    "refine_or_redesign": "Either refine or redesign to improve the algorithm.",
+    
+}
